@@ -1,0 +1,556 @@
+[
+    {
+        "created": "2022-11-24T07:27:35.659Z",
+        "name": "readfile",
+        "tags": [
+            "readxs"
+        ],
+        "content": "with open('pyfile.txt', 'r') as f:\n    # Comment: pyfile.txt\n    for line in f:\n        # process each line here, remove \\n using strip\n        line = line.replace(\"    \", \"\\t\").strip()\n        print(line, end=\",\\n\")\n    # end for\n# end readline file\n",
+        "contentType": "python"
+    },
+    {
+        "created": "2022-11-24T14:08:35.143Z",
+        "name": "unitest single file demo",
+        "tags": [
+            "unittest",
+            "tdd",
+            "test"
+        ],
+        "content": "import os\nimport sys\nimport unittest\n\nsys.path.append(os.path.dirname(os.path.dirname(__file__)))\n\nfrom src.answer import Board, Manager, SubNet, IpTool\n\n\nclass IpToolTest(unittest.TestCase):\n\n    def setUp(self):\n        print(\"----- Test Begin ----\")\n\n    def tearDown(self):\n        print(\"----- Test End  ----\")\n\n    def test_is_ip_in_subnet(self):\n        test_cases = {\n            'ip in subnet': {\n                'input': [\"1.1.1.1\", \"1.1.1.0/24\"],\n                'expect': True\n            },\n            'ip not in subnet': {\n                'input': [\"192.1.1.1\", \"1.1.1.0/24\"],\n                'expect': False\n            }\n        }\n\n        \n        for case_name, case in test_cases.items():\n            result = IpTool().is_ip_in_subnet(case['input'][0], case['input'][1])\n            self.assertEqual(result, case['expect'])\n    \n    def test_is_ip_in_abc(self):\n        test_cases = {\n            'ip in class a': {\n                'input': \"1.0.0.2\",\n                'expect': True\n            },\n            'ip in class b': {\n                'input': \"128.1.0.2\",\n                'expect': True\n            },\n            'ip in class c': {\n                'input': \"192.0.1.2\",\n                'expect': True\n            },\n            'ip not in class abc': {\n                'input': \"224.0.0.1\",\n                'expect': False\n            }\n\n        }\n\n        \n        for case_name, case in test_cases.items():\n            result = IpTool().is_ip_in_abc(case['input'])\n            self.assertEqual(result, case['expect'])\n\n\nif __name__ == '__main__':\n    unittest.main()\n\n",
+        "contentType": "python"
+    },
+    {
+        "created": "2022-11-24T15:00:33.448Z",
+        "name": "get current path",
+        "tags": [
+            "path"
+        ],
+        "content": "self.home_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))",
+        "contentType": "python"
+    },
+    {
+        "created": "2022-11-25T07:00:07.003Z",
+        "name": "list files with depth and no depth",
+        "tags": [
+            "path",
+            "list"
+        ],
+        "content": "def walklevel(path, depth = 1):\n    \"\"\"It works just like os.walk, but you can pass it a level parameter\n       that indicates how deep the recursion will go.\n       If depth is 1, the current directory is listed.\n       If depth is 0, nothing is returned.\n       If depth is -1 (or less than 0), the full depth is walked.\n    \"\"\"\n    if depth < 0:\n        for root, dirs, files in os.walk(path):\n            yield root, dirs[:], files\n        return\n    elif depth == 0:\n        return\n    base_depth = path.rstrip(os.path.sep).count(os.path.sep)\n    for root, dirs, files in os.walk(path):\n        yield root, dirs[:], files\n        cur_depth = root.count(os.path.sep)\n        if base_depth + depth <= cur_depth:\n            del dirs[:]\n\nfor dirpath, dirnames, filenames in walklevel(\".\", 2):\n    # print(\"##\")\n    # print(dirpath)\n    # print(os.path.split(dirpath)[1])\n    # print(\"##=\")\n    if os.path.split(dirpath)[1].startswith(\".\") is True:\n        print(os.path.split(dirpath)[1])\n    \n        continue\n    \n    for filename in filenames:\n        pass\n        # print(os.path.join(dirpath, filename))",
+        "contentType": "python"
+    },
+    {
+        "created": "2022-11-29T05:51:47.527Z",
+        "name": "log: create std log ",
+        "tags": [
+            "log"
+        ],
+        "content": "import logging\nimport logging.handlers\n\n\nclass LogManager():\n    log_disabled = False\n\n    @staticmethod\n    def new_logger(file_name):\n        logger = logging.getLogger(file_name)\n        logger.setLevel(logging.DEBUG)\n        # 控制台输出\n        handler = logging.StreamHandler()\n        formatter = logging.Formatter(\n            \"%(asctime)s %(name)s %(levelname)s %(message)s\")\n        handler.setFormatter(formatter)\n\n        logger.addHandler(handler)\n\n        # 全局开关\n        logger.disabled = LogManager.log_disabled\n\n        return logger\n",
+        "contentType": "python"
+    },
+    {
+        "created": "2022-12-02T03:57:34.777Z",
+        "name": "load and dump json as dict , assert key is in dict",
+        "tags": [
+            "json",
+            "dict"
+        ],
+        "content": "     class CpuReboundNotify:\n            \"\"\"extend.cpu_rebound_notify字段\"\"\"\n            @staticmethod\n            def get_config(service_instance):\n                \"\"\" 绑核变更通知字段\n                service 对象\n                {\n                    ...\n                    \"extend\": {\\\"cpu_rebound_notify\\\":{\\\"notify_service\\\":\\\"1-hucm\\\"}}\n                }\n                \"\"\"\n                extend_str = service_instance.extend\n                if extend_str is None:\n                    return False, None\n                try:\n                    extend = json.loads(extend_str)\n                    config = extend[SERVICE_EXTEND_CPU_REBOUND_NOTIFY]\n                except KeyError:\n                    return False, None\n\n                if 'notify_service' not in config:\n                    return False, None\n\n                return True, config\n\n            @staticmethod\n            def set_config(service_instance, rc_dict):\n                extend_str = service_instance.extend\n                if extend_str is None:\n                    extend_str = '{}'\n                extend = json.loads(extend_str)\n                is_existed, config = ServiceUtil.Extend.CpuReboundNotify.prase_config(rc_dict)\n                if is_existed is False:\n                    return\n                config['notify_service'] = \"%s-%s\" % (service_instance.ns_name, config['notify_service'])\n\n                extend[SERVICE_EXTEND_CPU_REBOUND_NOTIFY] = config\n                service_instance.extend = json.dumps(extend)\n                logger.info(\"add %s extend config %s to notify function succ \" % (service_instance.name, extend))\n\n            @staticmethod\n            def prase_config(rc_dict):\n                try:\n                    config_str = rc_dict['spec']['template']['metadata']['annotations']['isolateCpuRebound']\n                    config = json.loads(config_str)\n                except KeyError:\n                    return False, None\n\n                if len(config) != 1:\n                    return False, None\n\n                if 'notify_service' not in config:\n                    return False, None\n                return True, config\n",
+        "contentType": "python"
+    },
+    {
+        "created": "2022-12-07T07:03:18.477Z",
+        "name": "simple hello world",
+        "tags": [
+            "main"
+        ],
+        "content": "package main\n// 1. package 是包管理开头\n// 2. main 包 意味着主进程\n\nimport \"fmt\"\n// 运行 go run xxx.go\nfunc main(){\n\tfmt.Println(\"Hello, 世界!\")\n}",
+        "contentType": "go"
+    },
+    {
+        "created": "2022-12-07T09:07:28.014Z",
+        "name": "simple use local module",
+        "tags": [
+            "module"
+        ],
+        "content": "// 本地创建两个模块，hello 模块引用 greeting \n// <home>/\n  |-- greetings/\n  |-- hello/\n// 步骤 \n// step1: 创建 greeting 模块\n// step2: hello 引用 ： 会报错\n// step3: 改成引用本地地址\n// go mod edit -replace example.com/greeting=../greeting 改引用地址\nreplace example.com/greeting => ../greeting\n// step4: go mod tidy 更新本地 版本号\n// mod 配置文件 有 require example.com/greeting v0.0.0-00010101000000-000000000000\n\n// 更多配置管理： https://go.dev/doc/modules/managing-dependencies\n1. 增加、删除、升级、重定向依赖\n2. goproxy 代理服务\n\nimport (\n\t\"fmt\"\n\t// step2: 引用， 但是 go run 时 仍从site下载，需要 go.mod 中指向本地\n\t\"example.com/greeting\"\n)\n\n// 运行 go run xxx.go\nfunc main() {\n\tmessage := greeting.Hello(\"Gladys\")\n\tfmt.Println(message)\n}",
+        "contentType": "go"
+    },
+    {
+        "created": "2022-12-08T00:53:34.431Z",
+        "name": "simlple new error and catch error",
+        "tags": [
+            "basic",
+            "error"
+        ],
+        "content": "package main\n\nimport (\n\t// errors 内建模块\n\t\"errors\"\n\t\"fmt\"\n\t\"log\"\n)\n\n// err 返回错误\nfunc Hello(name string) (string, error) {\n\n\t// step1: 创建一个 error .\n\tif name == \"\" {\n\t\treturn \"\", errors.New(\"empty name\")\n\t}\n\n\t// If a name was received, return a value that embeds the name\n\t// in a greeting message.\n\tmessage := fmt.Sprintf(\"Hi, %v. Welcome!\", name)\n\treturn message, nil\n}\n\nfunc main() {\n\tlog.SetPrefix(\"greetings: \")\n\tlog.SetFlags(0)\n\n\tmessage, err := Hello(\"\")\n\t// 返回错误，打印错误，退出程序\n\t// step2: 捕获错误\n\tif err != nil {\n\t\t// fatal 会直接退出\n\t\tlog.Fatal(err)\n\t}\n\n\tfmt.Println(message)\n\n}",
+        "contentType": "go"
+    },
+    {
+        "created": "2022-12-08T03:58:19.100Z",
+        "name": "simple slice map rand time ",
+        "tags": [
+            "slice",
+            "map",
+            "time",
+            "rand"
+        ],
+        "content": "package main\n\nimport (\n\t\"errors\"\n\t\"fmt\"\n\t\"log\"\n\t\"math/rand\"\n\t\"time\"\n)\n\nfunc randomFormat() string {\n\t// step1: slice 像一个数组，但是可以动态改变\n\tformats := []string{\n\t\t\"Hi, %v. Welcome!\",\n\t\t\"Great to see you, %v!\",\n\t\t\"Hail, %v! Well met!\",\n\t}\n\t// 随机选\n\treturn formats[rand.Intn(len(formats))]\n}\n\nfunc Hello(name string) (string, error) {\n\tif name == \"\" {\n\t\treturn name, errors.New(\"empty name\")\n\t}\n\tmessage := fmt.Sprintf(randomFormat(), name)\n\treturn message, nil\n}\n\n// step2 重命名函数 ：\n// map[string]string   kv 都是 string 的字典\nfunc Hellos(names []string) (map[string]string, error) {\n\tmessages := make(map[string]string)\n\n\tfor _, name := range names {\n\t\tmessage, err := Hello(name)\n\t\tif err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\tmessages[name] = message\n\t}\n\treturn messages, nil\n}\n\nfunc init() {\n\t// 起始随机数\n\trand.Seed(time.Now().UnixNano())\n}\n\n// 运行 go run xxx.go\nfunc main() {\n\tlog.SetPrefix(\"greetings: \")\n\tlog.SetFlags(0)\n\n\t// A slice of names.\n\tnames := []string{\"Gladys\", \"Samantha\", \"Darrin\"}\n\n\t// Request greeting messages for the names.\n\tmessages, err := Hellos(names)\n\tif err != nil {\n\t\tlog.Fatal(err)\n\t}\n\t// If no error was returned, print the returned map of\n\t// messages to the console.\n\tfmt.Println(messages)\n}\n",
+        "contentType": "go"
+    },
+    {
+        "created": "2022-12-08T07:15:46.689Z",
+        "name": "simple  use workspace and relace module online",
+        "tags": [
+            "workspace",
+            "replace"
+        ],
+        "content": "// workspace 会生成一个 go.work 文件， 告诉 go 程序，使用那些模块\n// go 1.8 支持， 比 repalace 仓库到本地 更方便一些\n// 作用 1. 在workspace 下，无论在那一层执行 go run , 主程序都是 go.work 中配置的\n// 作用 2： 可以替换 远程仓库的 包， 为其增加方法。\n\npackage main\n\n// step1: 创建 workspace 目录，创建 workspace/hello 模块\n// step2: 在 workspace 下 创建 workspace : go work init ./hello\n//          1. 意思是将 hello 模块加入 workspace\n//          2. go run example.com/hello ，任何子目录下，执行这个都可以\n// step3: 为线上库添加方法：\n//          git clone https://go.googlesource.com/example 下载到本地\n//          go work use ./example ; 添加到work\n//          新加方法, ./example/stringutil/新加文件  package 用 stringutil\n\n// step4: 启动， 已经找到自己新加的方法\n\nimport (\n\t\"fmt\"\n\n\t\"golang.org/x/example/stringutil\"\n)\n\nfunc main() {\n\tfmt.Println(stringutil.Reverse(\"Hello\"))\n\t// 使用 自定义的方法\n\tfmt.Println(stringutil.ToUpper(\"Hello\"))\n}",
+        "contentType": "go"
+    },
+    {
+        "created": "2022-12-08T07:37:12.266Z",
+        "name": "simple http server use gin",
+        "tags": [
+            "http",
+            "get",
+            "post"
+        ],
+        "content": "// 提供一个简单的http 服务\n// gin 是 http server\n//\n\npackage main\n\nimport (\n\t\"net/http\"\n\t// step1： 导入 gin http server\n\t\"github.com/gin-gonic/gin\"\n)\n\n// 结构体：类\ntype album struct {\n\tID     string  `json:\"id\"`\n\tTitle  string  `json:\"title\"`\n\tArtist string  `json:\"artist\"`\n\tPrice  float64 `json:\"price\"`\n}\n\n// step2: 定义业务接口\n// slice 数据\nvar albums = []album{\n\t{ID: \"1\", Title: \"Blue Train\", Artist: \"John Coltrane\", Price: 56.99},\n\t{ID: \"2\", Title: \"Jeru\", Artist: \"Gerry Mulligan\", Price: 17.99},\n\t{ID: \"3\", Title: \"Sarah Vaughan and Clifford Brown\", Artist: \"Sarah Vaughan\", Price: 39.99},\n}\n\nfunc getAlbums(c *gin.Context) {\n\tgin.\n\t\tc.IndentedJSON(http.StatusOK, albums)\n}\n\nfunc postAlbums(c *gin.Context) {\n\tvar newAlbum album\n\n\t// Call BindJSON to bind the received JSON to\n\t// newAlbum.\n\tif err := c.BindJSON(&newAlbum); err != nil {\n\t\treturn\n\t}\n\n\t// Add the new album to the slice.\n\talbums = append(albums, newAlbum)\n\tc.IndentedJSON(http.StatusCreated, newAlbum)\n}\n\nfunc main() {\n\t// step3: 注册，并启动 http server\n\trouter := gin.Default()\n\trouter.GET(\"/albums\", getAlbums)\n\trouter.POST(\"/albums\", postAlbums)\n\trouter.Run(\"localhost:8080\")\n\t// step4: 访问\n}",
+        "contentType": "go"
+    },
+    {
+        "created": "2022-12-12T02:19:09.443Z",
+        "name": "simple panic and  recover",
+        "tags": [
+            "panic",
+            "recover"
+        ],
+        "content": "type Error string\nfunc (e Error) Error() string {\n    return string(e)\n}\n\n// error is a method of *Regexp that reports parsing errors by\n// panicking with an Error.\nfunc (regexp *Regexp) error(err string) {\n    panic(Error(err))\n}\n\n// Compile returns a parsed representation of the regular expression.\nfunc Compile(str string) (regexp *Regexp, err error) {\n    regexp = new(Regexp)\n    // doParse will panic if there is a parse error.\n    defer func() {\n        if e := recover(); e != nil {\n            regexp = nil    // Clear return value.\n            err = e.(Error) // Will re-panic if not a parse error.\n        }\n    }()\n    return regexp.doParse(str), nil\n}",
+        "contentType": "go"
+    },
+    {
+        "created": "2022-12-12T02:28:31.269Z",
+        "name": "simple std in read",
+        "tags": [
+            "stdin"
+        ],
+        "content": "package main\nimport (\n    \"fmt\"\n    \"bufio\"\n    \"os\"\n)\nvar inputReader *bufio.Reader\nvar input string\nvar err error\nfunc main() {\n    inputReader = bufio.NewReader(os.Stdin)\n    fmt.Println(\"Please enter some input: \")\n    input, err = inputReader.ReadString('\\n')\n    if err == nil {\n        fmt.Printf(\"The input was: %s\\n\", input)\n    }\n}",
+        "contentType": "go"
+    },
+    {
+        "created": "2022-12-12T02:32:18.543Z",
+        "name": "simple scanln , scanf,  ssancf",
+        "tags": [
+            "scanf"
+        ],
+        "content": "// 从控制台读取输入:\npackage main\nimport \"fmt\"\nvar (\n   firstName, lastName, s string\n   i int\n   f float32\n   input = \"56.12 / 5212 / Go\"\n   format = \"%f / %d / %s\"\n)\nfunc main() {\n   fmt.Println(\"Please enter your full name: \")\n   // 按行读取， Scanlf 第一个参数是分隔符，等同 scanlan\n   fmt.Scanln(&firstName, &lastName)\n   // fmt.Scanf(\"%s %s\", &firstName, &lastName)\n   fmt.Printf(\"Hi %s %s!\\n\", firstName, lastName) // Hi Chris Naegels\n   // 字符串读取\n   fmt.Sscanf(input, format, &f, &i, &s)\n   fmt.Println(\"From the string we read: \", f, i, s)\n    // 输出结果: From the string we read: 56.12 5212 Go\n}",
+        "contentType": "go"
+    },
+    {
+        "created": "2023-01-12T01:30:50.917Z",
+        "name": "assert use",
+        "tags": [
+            "assert"
+        ],
+        "content": "assert 'log' in tables , \"创建 log 表 失败\"",
+        "contentType": "python"
+    },
+    {
+        "created": "2023-01-12T01:32:42.400Z",
+        "name": "sqlite and create table",
+        "tags": [
+            "sql"
+        ],
+        "content": "    # 内存数据库\n    def __init__(self) :\n        self.connection = sqlite3.connect(\":memory:\")\n        self.cur = self.connection.cursor()\n        self.init_db()\n        \n        \n    \n    def init_db(self):\n        # 创建表 数据类型 https://www.runoob.com/sqlite/sqlite-data-types.html\n        sql_create_log_table = \"CREATE TABLE log(date TEXT NOT NULL, context TEXT NOT NULL);\"\n        self.cur.execute(sql_create_log_table)\n        sql_show_alltables = \"SELECT name FROM sqlite_master WHERE type='table';\"\n        tables = self.cur.execute(sql_show_alltables).fetchall()\n        assert 'log' in tables , \"创建 log 表 失败\"",
+        "contentType": "python"
+    },
+    {
+        "created": "2023-02-02T07:09:05.843Z",
+        "name": "net/http create simple http sever  ",
+        "tags": [
+            "net/http"
+        ],
+        "content": "package main\n\nimport (\n\t\"fmt\"\n\t\"log\"\n\t\"net/http\"\n)\n\nfunc main() {\n\thttp.HandleFunc(\"/\", indexHandler)\n\thttp.HandleFunc(\"/hello\", helloHandler)\n\n\tlog.Fatal(http.ListenAndServe(\":9999\", nil))\n}\n\nfunc indexHandler(w http.ResponseWriter, req *http.Request) {\n\tfmt.Fprintf(w, \"URL.Path %q\\n\", req.URL.Path)\n}\n\nfunc helloHandler(w http.ResponseWriter, req *http.Request) {\n\tfor k, v := range req.Header {\n\t\tfmt.Fprintf(w, \"Header[%q] = %q\\n\", k, v)\n\t}\n}\n",
+        "contentType": "go"
+    },
+    {
+        "created": "2023-02-03T02:43:14.993Z",
+        "name": "testing basic testcase",
+        "tags": [
+            "testing"
+        ],
+        "content": "import (\n\t// step1: 引入测试包\n\t\"regexp\"\n\t\"testing\"\n)\n\n// step1: 定义测试用例， Test 开头\n// step2: 测试 go test -v\nfunc TestHelloName(t *testing.T) {\n\tname := \"Gladys\"\n\twant := regexp.MustCompile(`\\b` + name + `\\b`)\n\tmsg, err := Hello(name)\n\t// step1: 创建一个 error .\n\tif !want.MatchString(msg) || err != nil {\n\t\tt.Fatalf(`Hello(\"Gladys\") = %q, %v, want match for %#q, nil`, msg, err, want)\n\t}\n\n}\n\nfunc TestHelloEmpty(t *testing.T) {\n\tname := \"\"\n\n\t_, err := Hello(name)\n\tif err == nil {\n\t\tt.Fatalf(\"expect a nill, but not\")\n\n\t}\n}",
+        "contentType": "go"
+    },
+    {
+        "created": "2023-02-03T03:02:41.104Z",
+        "name": "type basic opt : compare 、apped、copy ...",
+        "tags": [
+            "basic use"
+        ],
+        "content": "/* 基本类型 7类 19种 ==============================================================================\nbool 零值 false\nstring 零值 \"\"\n\nint  int8  int16  int32  int64\nuint uint8 uint16 uint32 uint64 uintptr\n// `int`, `uint` 和 `uintptr` 在 32 位系统上通常为 32 位宽，在 64 位系统上则为 64 位宽。零值 0\nbyte // uint8 的别名\n\nrune // int32 的别名 // 表示一个 Unicode 码点\n\nfloat32 float64\n\ncomplex64 complex128  复数\n复杂类型: nil\n*/\n\n/* 常见操作 ==============================================================================\n\n// 类型转换 unint(f),\n// 常量 const Pi [float] = 3.14,  类型可不带\n// 变量声明\nvar f int = 20 分配空间\n\n\n*/\n\n/* 控制逻辑 ==============================================================================\n\n// if 逻辑\nif condition1;cd2 {\n    // do something\n} else if condition2 {\n    // do something else\n} else {\n    // catch-all or default\n}\n// for 逻辑\n一般 for i, j := 0, N; i < j; i, j = i+1, j-1 {}\n永恒 for {}\n遍历 for for ix, value := range slice1{} 不保证顺序\n遍历 保证顺序\nimport \"sort\"\nvar names []string\nfor name := range ages {\n    names = append(names, name)\n}\nsort.Strings(names)\nfor _, name := range names {\n    fmt.Printf(\"%s\\t%d\\n\", name, ages[name])\n}\n*/\n\n/* 复杂类型 ==============================================================================\n\n数组 -----------------------------------------------------------------------\n声明\nvar arr [5]int  类型 [5]int 初始值为0\nvar arr = new([5]int) 类型 *[5]int\n初始化\nvar a [3]int = [3]int{1, 2, 3}\nvar arrKeyValue = [5]string{3: \"Chris\", 4: \"Ron\"}} 带索引\n比较 ： 使用 == ,!=\n\n切片 -----------------------------------------------------------------------\n初始化\nmonths := []string{1: \"January\", / ... /, 12: \"December\"} 和数组区别不带数量\nmake([]T, len, cap)\n比较\nreflect.DeepEqual([]string{\"a\", \"b\"} []string{\"a\", \"b\"}) 不能直接比较\n增删改查\nappend(sliceA, e)\ndelete(agess, \"\")\n注意：\n无法取地址  &age[\"bob 非法\"]\n\nmap -----------------------------------------------------------------------\n初始化 make([]map[int]int, 5)\n赋值\nmap[string]int{\"hello\":2}\nfor k, v:= range items {\n}\n\n结构体 -----------------------------------------------------------------------\n定义 type  Em struct{ id int }\n声明\nvar d Em\nd.id -5\n\nt := Em{id:1}\n注意： 结构体的全部成员都是可以比较的，那么结构体也是可以比较的。（成员顺序不同，不算相等）\n嵌套结构体：成员可以直接使用 wheel.point 即可，不需要 wheel.circle.point\n\n接口-----------------------------------------------------------------------\ntype Writer interface {\n    Write(p []byte) (n int, err error)\n}\n类型断言： w.(*os.File)    转换成一个 os.File 类型的值\n*/",
+        "contentType": "go"
+    },
+    {
+        "created": "2023-02-07T06:45:19.058Z",
+        "name": "angular-cli  : create app",
+        "tags": [
+            "angular"
+        ],
+        "content": "# step1 安装 angular 包： npm install -g @angular/cli\n# step2 创建 模板应用： ng new my-app 一路回车\n# step3 启动 cd my-app ; ng serve --open\n\n访问 http://localhost:4200\n\n# 问题 \nnpm 下载包失败: 更换国内源\n> npm config get registry \n> 换 国内源 npm config set registry http://registry.cnpmjs.org/ \n> 还原 npm config set registry https://registry.npmjs.org/",
+        "contentType": "plaintext"
+    },
+    {
+        "created": "2023-02-07T06:51:02.668Z",
+        "name": "angular cli : ng new my-app",
+        "tags": [
+            "angular"
+        ],
+        "content": "# step1 安装 angular 包： npm install -g @angular/cli\n# step2 创建 模板应用： ng new my-app 一路回车\n# step3 启动 cd my-app ; ng serve --open\n\nnpm install/update 默认安装 package.json 中所有模块\n\n访问 http://localhost:4200\n\n# 问题 \nnpm 下载包失败: 更换国内源\n> npm config get registry \n> 换 国内源 npm -i nrm; nrm use taobao; nrm use npm\n\n# 其他：\nng build 编译\nng servr 编译\nng generate 基于原理图 schmeatic 生成文件\nng test 单测\nng e2e 进行端到端测试\n",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-08T06:36:51.479Z",
+        "name": "array basic use",
+        "tags": [
+            "array"
+        ],
+        "content": "# shell 支持 一维数组\narr=(value1 value2 ... valuen)\n# 访问\nvalue1=${arr[0]} # 访问值\n${arr[*]}\n${arr[@]} # 访问所有的元素\n${#arr[@]} # 访问数组的长度\n# 遍历-元素\nfor element in ${array[@]};do\necho $element \ndone\n# 遍历-带下标\nfor i in \"${!array[@]}\";do  # for (( i=0;i<${#array[@];i++})) \necho $i ${array[i]}\ndone",
+        "contentType": "shellscript"
+    },
+    {
+        "created": "2023-02-08T07:15:50.359Z",
+        "name": "string basic usage",
+        "tags": [
+            "string"
+        ],
+        "content": "${var#*bc} # 删除，自左向右，bc 第一次出现 abcdeabcde -> deabcde\n${var##*bc} # 删除，自左向右，bc 最后一次出现 abcdeabcde -> de\n${var%bc*}\n${var%%bc*} # 删除 同上，自右向左\n\n${var:4} # 切片，4 ~ end\n${var:4:5} # 切片，4 ~ 9\n${var: -4} # 切片  end-4 ~ end\n\n${var/w/W} # 替换 第一次出现w ->W\n${var//w/W} # 替换 全部出现w ->W\n${var/#w/W} # 替换 行首为w,就替换为 c ,一次\n${var/%w/W} # 替换 行尾为w,就替换为 c ,一次\n${var/w} # 删除 上午没有替换部分， 相当于删除\n\n${var^^} # 大小写替换 ，小写 to 大写\n${var,,} # 大小写替换 ，大写 to 小写\n\n${var:-word} # var为空或未声明，则返回word所表示的字符串；否则，则返回var变量的值\n${var:+word} # 变量var为空或未声明，忽略；否则，则返回word\n${var:=word} #变量var为空或未声明，则返回word所表示的字符串，并且把word赋值为var变量，否则，则返回var变量的值\n${var:?error} # 变量var为空或未声明，则返回error为错误信息，否则，则返回var变量的值",
+        "contentType": "shellscript"
+    },
+    {
+        "created": "2023-02-08T07:28:15.507Z",
+        "name": "compare opt basic useage",
+        "tags": [
+            "compare"
+        ],
+        "content": "# 关系运算符 只支持数字\n[ $a -eq $b ] # ==\n[ $a -ne $b ] # !=\n[ $a -gt $b ] # >\n[ $a -lt $b ] # <\n[ $a -ge $b ] # >=\n[ $a -le $b ] # <=\n#逻辑运算符\n[[ $a -lt 100 && $b -gt 100 ]] # && || 与或\n#字符串运算符\n[ $a = $b ] #相等\n[ -z $a ] # 不相等\n[ -n \"$a\" ] # 长度为0\n[ $a ] # 长度不为空 为 true\n# 文件测试运算符\n-b file\t# 检测文件是否是块设备文件，如果是，则返回 true。\n-c file\t# 检测文件是否是字符设备文件，如果是，则返回 true。\n-d file\t# 检测文件是否是目录，如果是，则返回 true。\n-f file\t# 检测文件是否是普通文件（既不是目录，也不是设备文件），如果是，则返回 true。\n-g file\t# 检测文件是否设置了 SGID 位，如果是，则返回 true。\n-k file\t# 检测文件是否设置了粘着位(Sticky Bit)，如果是，则返回 true。\n-p file\t# 检测文件是否是有名管道，如果是，则返回 true。\n-u file\t# 检测文件是否设置了 SUID 位，如果是，则返回 true。\n-r file\t# 检测文件是否可读，如果是，则返回 true。\n-w file\t# 检测文件是否可写，如果是，则返回 true。\n-x file\t# 检测文件是否可执行，如果是，则返回 true。\n-s file\t# 检测文件是否为空（文件大小是否大于0），不为空返回 true。\n-e file\t# 检测文件（包括目录）是否存在，如果是，则返回 true。 使用 [ -s $file ] 返回 true。",
+        "contentType": "shellscript"
+    },
+    {
+        "created": "2023-02-16T02:36:05.191Z",
+        "name": "html basic 元素 + 属性",
+        "tags": [
+            "html"
+        ],
+        "content": "<!DOCTYPE html> <!-- html5 的声明 -->\n<!--基本概念： 元素\n元素： 标签\n属性： 为元素提供附加信息\n-->\n<html>\n<!--核心三元素： html、header、body-->\n\n<head>\n    <!-- 头部元素： 定义脚本字符集等：  https://www.runoob.com/html/html-head.html-->\n    <meta charset=\"UTF-8\">\n    <title>页面标题</title>\n</head>\n\n<body>\n    <a href=\"https://www.runoob.com/tags/html-reference.html\"> 完整的标签列表</a>\n    <!--常见元素-->\n    <h1>我的第一个标题</h1>\n    <p>我的第一个段落。</p>\n    <a href=\"https://www.runoob.com\">这是一个链接</a>\n    <img decoding=\"async\" src=\"/images/logo.png\" width=\"258\" height=\"39\" /> <!--图片-->\n    <br> <!--空行-->\n\n    <!--属性是 HTML 元素提供的附加信息 name =\"value \"-->\n    <a href=\"https://www.runoob.com/tags/html-reference.html\"> 完整的标签列表 以及具备的属性 </a>\n    <a href=\"https://www.runoob.com/tags/att-global-class.html\"> 标准的属性参数 </a>\n    <a id = \"唯一的id\">\n    <a calss = \"类名， 标签可以有多个类名\">\n    <a style=\"color:blue;text-align:center\">\n    \n\n</body>\n\n</html>",
+        "contentType": "html"
+    },
+    {
+        "created": "2023-02-16T02:46:30.852Z",
+        "name": "html basic 事件：函数",
+        "tags": [
+            "html"
+        ],
+        "content": "<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset=\"utf-8\">\n    <title>菜鸟教程(runoob.com)</title>\n    <!--demo script-->\n    <script>\n        function load() {\n            alert(\"页面已经载入！\");\n        }\n    </script>\n</head>\n\n<!-- 事件传递给 浏览器，触发 script 函数\n    默认事件: https://www.runoob.com/tags/ref-eventattributes.html -->\n\n<!--demo-->\n<body onload=\"load()\">\n    <h1>Hello World!</h1>\n</body>\n<!--常用事件：\n1. 窗口事件\n2. 表单事件\n3. 键盘事件\n4. 鼠标事件：\n5. 多媒体事件：\n6. 其他事件：\n-->\n</html>",
+        "contentType": "html"
+    },
+    {
+        "created": "2023-02-16T03:00:16.880Z",
+        "name": "html basic 画布 canvas",
+        "tags": [
+            "html"
+        ],
+        "content": "<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset=\"utf-8\">\n    <title>菜鸟教程(runoob.com)</title>\n</head>\n\n<body>\n    <!-- HTML5 <canvas> 标签用于绘制图像（通过脚本，通常是 JavaScript）。\n    不过，<canvas> 元素本身并没有绘制能力（它仅仅是图形的容器） - 您必须使用脚本来完成实际的绘图任务。 -->\n    \n    <!-- 属性大全 https://www.runoob.com/tags/ref-canvas.html-->\n    <canvas id=\"myCanvas\" width=\"300\" height=\"150\" style=\"border:1px solid #d3d3d3;\">\n        您的浏览器不支持 HTML5 canvas 标签。\n    </canvas>\n    <script>\n        var c = document.getElementById(\"myCanvas\");\n        var ctx = c.getContext(\"2d\");\n        ctx.rect(20, 20, 150, 100);\n        ctx.stroke();\n    </script>\n\n</body>\n\n</html>",
+        "contentType": "html"
+    },
+    {
+        "created": "2023-02-16T03:15:48.485Z",
+        "name": "html basic css 样式",
+        "tags": [
+            "html"
+        ],
+        "content": "<!DOCTYPE html>\n<html>\n<!-- CSS (Cascading Style Sheets) 用于渲染HTML元素标签的样式。\n+ 内联样式- 在HTML元素中使用\"style\" 属性\n+ 内部样式表 -在HTML文档头部 <head> 区域使用<style> 元素 来包含CSS\n+  最佳方式：外部引用 - 使用外部 CSS 文件\n\nhttps://www.runoob.com/html/html-css.html\n-->\n<head>\n    <meta charset=\"utf-8\">\n    <title>菜鸟教程(runoob.com)</title>\n    <!--内部样式： 标签 + 样式-->\n    <style type=\"text/css\">\n        body {background-color:yellow;}\n        p {color:blue;}\n    </style>\n\n    <!--外部样式：-->\n    <link rel=\"stylesheet\" type=\"text/css\" href=\"mystyle.css\">\n\n</head>\n\n<body style=\"background-color:yellow;\">\n    <!--内联样式-->\n    <h2 style=\"background-color:red;\">这是一个标题</h2>\n    <p style=\"background-color:green;\">这是一个段落。</p>\n\n\n\n</body>\n\n</html>",
+        "contentType": "html"
+    },
+    {
+        "created": "2023-02-16T03:26:58.007Z",
+        "name": "html basic 速查列表",
+        "tags": [
+            "html"
+        ],
+        "content": "\n常见元素 \nhttps://www.runoob.com/html/html-iframes.html\n\n1. 图像： 插入图像\n2. 表格： 表格绘制\n3. 列表： \n4. 区块： 标签容器， div 和 span\n5. 布局： 布局方式\n6. 表单: HTML 表单用于收集用户的输入信息。此区域包含交互控件，将用户收集到的信息发送到 Web 服务器。\n7. 框架： 通过使用框架，你可以在同一个浏览器窗口中显示不止一个页面\n8. 脚本： \n9. 字符实体：  https://www.runoob.com/html/html-entities.html\n\n10. html 速查列表 : https://www.runoob.com/html/html-quicklist.html",
+        "contentType": "html"
+    },
+    {
+        "created": "2023-02-16T05:58:13.018Z",
+        "name": "html basic 特性速查",
+        "tags": [
+            "html"
+        ],
+        "content": "常见元素 \nhttps://www.runoob.com/html/html-iframes.html\n\n1. 图像： 插入图像\n2. 表格： 表格绘制\n3. 列表： \n4. 区块： 标签容器， div 和 span\n5. 布局： 布局方式\n6. 表单: HTML 表单用于收集用户的输入信息。此区域包含交互控件，将用户收集到的信息发送到 Web 服务器。\n7. 框架： 通过使用框架，你可以在同一个浏览器窗口中显示不止一个页面\n8. 脚本： \n9. 字符实体：  https://www.runoob.com/html/html-entities.html\n\n10. html 速查列表 : https://www.runoob.com/html/html-quicklist.html\n\n\nhtml5 新特性\n1. svg 支持矢量图形\nhttps://www.iconfont.cn/ 阿里矢量图\nhttps://blog.csdn.net/weixin_48337566/article/details/123379553 使用教程\n\n2. mathml 数学符号\n3. 拖放 图形拖放\n4. localstorage 永久  sessionStorge 窗口期。比 cookie 更好的存储\n\n<div id=\"result\"></div> <!--显示-->\n<script>\nif(typeof(Storage)!==\"undefined\")\n{\n  // 存储\n  localStorage.setItem(\"sitename\", \"菜鸟教程\");\n  // 查找\n  document.getElementById(\"result\").innerHTML = \"网站名：\" +  localStorage.getItem(\"sitename\");\n}\n</script>\n\n5. websql 使用 sql\n6. webworker 后台的 js  多线程\n7. SSE HTML5 服务器发送事件（server-sent event）允许网页获得来自服务器的更新。\n8. websocket 支持 web socket 通信， 减少 通信建链成本\n9 http 状态 码",
+        "contentType": "html"
+    },
+    {
+        "created": "2023-02-16T06:07:33.883Z",
+        "name": "css basic 格式",
+        "tags": [
+            "css"
+        ],
+        "content": "/*css 教程 https://www.runoob.com/css/css-syntax.html */\n\n/* css 负责 html 样式：\np     {color:red;text-align:center;}  \n选择器 属性：值；属性：值\n\n\n样式优先级： 内联 > 内部 > 外部 > 浏览器默认 \n*/\n\n\n/* 选择器 : id, class*/\n#idselector \n{\n    text-align: center;\n}\n/* 属性选择器 */\n.center{}\np.center{}",
+        "contentType": "css"
+    },
+    {
+        "created": "2023-02-16T06:26:18.716Z",
+        "name": "js basic 基础使用",
+        "tags": [
+            "js"
+        ],
+        "content": "// 简单教程 https://www.runoob.com/js/js-intro.html \n\n// script 标签只能放到 head 和 body 中\n// 外部引用 <script src=\"myScript.js\"></script>\n\n// console 调试： python 解释器差不多 \n//https://www.runoob.com/js/js-chrome.html \n\n< !DOCTYPE html >\n    <html>\n        <head>\n            <meta charset=\"utf-8\">\n                <title>菜鸟教程(runoob.com)</title>\n        </head>\n        <body>\n\n            <h1>我的第一段 JavaScript</h1>\n            <p id=\"demo\">\n                JavaScript 能改变 HTML 元素的内容。\n            </p>\n            <script>\n                {/* step2: 定义函数 */}\n                function myFunction()\n                {\n                    x = document.getElementById(\"demo\");  // 找到元素\n                    x.innerHTML=\"Hello JavaScript!\";    // 改变内容\n                }\n            </script>\n            {/* step1: 按键绑定 onclick 事件 */}\n            <button type=\"button\" onclick=\"myFunction()\">点击这里</button>\n\n        </body>\n    </html>",
+        "contentType": "javascript"
+    },
+    {
+        "created": "2023-02-16T06:56:18.253Z",
+        "name": "js basic  输出\\字面量\\作用域\\事件",
+        "tags": [
+            "js basic"
+        ],
+        "content": "// 打印和输出  js 没有 print 函数\n\n// 1. window.alert(5 + 6); 弹出告警框\n// 2. document.write(\"hello\"); 写到html 文档\n// 3. document.getElementById(\"demo\").innerHTML = \"段落已修改。\" 写到 元素\n// 4. console.log() 写到浏览器控制台\n\n\n// 字面量：\n \n有 6 种不同的数据类型：string number boolean object function symbol\n3 种对象类型：Object Date Array\n2 个不包含任何值的数据类型：null undefined\n\n// 1. Number 数字: 3.14 1001\n// 2. String 字符串 : \"we\" '100'\n// 3. 表达式字面量： 5 + 6\n// 4. 数组 [40, 100, 1, 5, 25, 10]\n// 5. 对象 Object {firstName:\"John\", lastName:\"Doe\", age:50, eyeColor:\"blue\"}\n// 6. 函数 function myFunction(a, b) { return a * b;}\n\n// 数据类型\n\n// 值类型： 字符串（String）、数字(Number)、布尔(Boolean)、空（Null）、未定义（Undefined）、Symbol。\n// 引用数据类型 ： 对象(Object)、数组(Array)、函数(Function)，还有两个特殊的对象：正则（RegExp）和日期（Date）\n// 分typeof false \n\n// 作用域\nvar carName=\"\" //局部变量\ncarName=\"\" // 全局变量\n\n// 事件\nhtml 默认的事件",
+        "contentType": "javascript"
+    },
+    {
+        "created": "2023-02-16T06:59:58.392Z",
+        "name": "js basic 控制语句",
+        "tags": [
+            "js"
+        ],
+        "content": "// if\nif (condition1)\n{\n    当条件 1 为 true 时执行的代码\n}\nelse if (condition2)\n{\n    当条件 2 为 true 时执行的代码\n}\nelse\n{\n  当条件 1 和 条件 2 都不为 true 时执行的代码\n}\n// switch\nswitch(n)\n{\n    case 1:\n        执行代码块 1\n        break;\n    case 2:\n        执行代码块 2\n        break;\n    default:\n        与 case 1 和 case 2 不同时执行的代码\n}\n// for\nfor (var i=0;i<cars.length;i++)\n{ \n    document.write(cars[i] + \"<br>\");\n}\n// while (i<5)\n{\n    x=x + \"The number is \" + i + \"<br>\";\n    i++;\n}",
+        "contentType": "javascript"
+    },
+    {
+        "created": "2023-02-16T07:14:28.609Z",
+        "name": "js basic 类型转化、正则、错误、this、异步请求发送",
+        "tags": [
+            "js"
+        ],
+        "content": "类型转化： https://www.runoob.com/js/js-type-conversion.html\nNumber() 转换为数字， String() 转换为字符串， Boolean() 转换为布尔值。\n\n正则表达式：\nvar str = \"Visit Runoob!\"; \nvar n = str.search(/Runoob/i);\n\n错误：\nvar txt=\"\"; \nfunction message() \n{ \n    try { \n        adddlert(\"Welcome guest!\"); \n    } catch(err) { \n        txt=\"本页有一个错误。\\n\\n\"; \n        txt+=\"错误描述：\" + err.message + \"\\n\\n\"; \n        txt+=\"点击确定继续。\\n\\n\"; \n        alert(txt); \n    } \n}\n\nthis 关键字:\n\n在方法中，this 表示该方法所属的对象。\n如果单独使用，this 表示全局对象。\n在函数中，this 表示全局对象。\n在函数中，在严格模式下，this 是未定义的(undefined)。\n在事件中，this 表示接收事件的元素。\n类似 call() 和 apply() 方法可以将 this 引用到任何对象。\n\n异步请求发送\nxhr",
+        "contentType": "javascript"
+    },
+    {
+        "created": "2023-02-16T07:18:42.136Z",
+        "name": "js basic 类 ",
+        "tags": [
+            "js"
+        ],
+        "content": "类定义\n\nclass Runoob {\n    constructor(name, url) {\n      this.name = name;\n      this.url = url;\n    }\n  }\nnew Runoob()\n\n匿名类\n// 未命名/匿名类\nlet Runoob = class {\n    constructor(name, url) {\n      this.name = name;\n      this.url = url;\n    }\n  };\n  console.log(Runoob.name);\n  // output: \"Runoob\"\n\n类继承\n// 基类\nclass Animal {\n    // eat() 函数\n    // sleep() 函数\n};\n \n \n//派生类\nclass Dog extends Animal {\n    // bark() 函数\n};",
+        "contentType": "javascript"
+    },
+    {
+        "created": "2023-02-16T07:22:18.401Z",
+        "name": "js basic 操作 DOM / BOM",
+        "tags": [
+            "js"
+        ],
+        "content": "DOM html 元素\nBOM 浏览器 元素 \n\njs 可以操作 浏览器元素\n\nhttps://www.runoob.com/js/js-htmldom.html",
+        "contentType": "javascript"
+    },
+    {
+        "created": "2023-02-16T07:38:04.161Z",
+        "name": "js basic 操作 BOM DOM",
+        "tags": [
+            "js"
+        ],
+        "content": "DOM html 元素\nBOM 浏览器 元素 \n\njs 可以操作 浏览器元素\n\nhttps://www.runoob.com/js/js-htmldom.html",
+        "contentType": "javascript"
+    },
+    {
+        "created": "2023-02-16T08:29:06.553Z",
+        "name": "typejs basic hello world",
+        "tags": [
+            "typejs"
+        ],
+        "content": "菜鸟教程： https://www.runoob.com/typescript/ts-array.html\n\n// step1: 代码\nconst hello : string = \"Hello World!\"\nconsole.log(hello)\n// step2: 编译 tsc a.ts\n\n// step3: 执行 node a.js",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-16T08:45:06.181Z",
+        "name": "typejs basic 变量声明",
+        "tags": [
+            "typejs"
+        ],
+        "content": "// 基础类型\nany 任意类型 声明为 any 的变量可以赋予任意类型的值。\nnumber 双精度 64 位浮点值。它可以用来表示整数和分数。\nstring 字符串\nenum 枚举 enum Color {Red, Green, Blue};\nvoid 用于标识方法返回值的类型，表示该方法没有返回值。\nnull 表示对象值缺失。\nundefined 用于初始化变量为一个未定义的值\nnever never 是其它类型（包括 null 和 undefined）的子类型，代表从不会出现的值。\n\nboolean 布尔 let flag: boolean = true;\nnumber[] 数组  let arr: number[] = [1, 2];\n\n元组 let x: [string, number];\n// let 和 var 区别\n用var声明的变量，只有函数作用域和全局作用域，没有块级作用域。而let可以实现块级作用域，只能在代码块{}内有效\n\n// 变量声明\nconst a = \"\" 常量\nvar uname:string = \"Runoob\"; // 没有初始值，变量值会设置为 undefined\nvar str = '1' ; var str2:number = <number> <any> str\n\n// 类型断言，完成类型转化\n// 数组\nvar arr:number[] = [12,13]\nvar sites:string[] = new Array(\"Google\",\"Runoob\",\"Taobao\",\"Facebook\")\narr.push(1), arr.pop()\n// map\nlet myMap = new Map([[\"key1\", \"value1\"],[\"key2\", \"value2\"]]);\nmap.has() map.size(), map.get(), map.delete(), map.set()\n// 元祖\n和数组类似，但是可以放不同类型",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-16T08:54:09.946Z",
+        "name": "typejs basic 联合类型、对象函数",
+        "tags": [
+            "typejs"
+        ],
+        "content": "// 函数，返回值可以忽略, ?: 可选参数; ...restOfName 剩余参数\nfunction function_name(firstName: string, rate:number = 0.50, lastName?: string,...restOfName: string[]):return_type { \n    // 语句\n    return value; \n}\n\n// 基本对象 操作\nNumber https://www.runoob.com/typescript/ts-number.html\nString https://www.runoob.com/typescript/ts-string.html\nArray https://www.runoob.com/typescript/ts-array.html\nMap 对象 https://www.runoob.com/typescript/ts-map.html\n\n联合类型 Type1|Type2|Type3   var val:string|number // 一个类型可以声明为多个",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-16T09:06:13.534Z",
+        "name": "typejs basic 接口的使用",
+        "tags": [
+            "typejs"
+        ],
+        "content": "// 接口\ninterface IPerson { \n    firstName:string, \n    lastName:string, \n    sayHi: ()=>string \n} \n \nvar customer:IPerson = { \n    firstName:\"Tom\",\n    lastName:\"Hanks\", \n    sayHi: ():string =>{return \"Hi there\"} \n} \n// 接口和数组， 接口和 联合类型\ninterface IPerson { \n    [index:string]:number , // 索引 string, 值 数组。 数组 var agelist:ages;  agelist[\"runoob\"] = 15  \n    commandline:string[]|string|(()=>string); // 联合类型\n} \n\n// 继承：多继承\nChild_interface_name extends super_interface1_name, super_interface2_name,…,super_interfaceN_name",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-16T09:12:22.965Z",
+        "name": "typejs basic 类",
+        "tags": [
+            "typejs"
+        ],
+        "content": "var global_num = 12          // 全局变量\n// 类\nclass Car { \n    // 字段 \n    engine:string; \n    object_num = 13;             // 实例变量\n    static static_num = 10;  //// 静态变量\n \n    // 构造函数 \n    constructor(engine:string) { \n        this.engine = engine \n    }  \n\n    // 方法 \n    disp():void { \n        console.log(\"发动机为 :   \"+this.engine) \n    } \n}\n// 继承， 单继承\nclass child_class_name extends parent_class_name\n//step1: 定义 demo.ts\n\nexport interface Product {\n  id: number;\n  name: string;\n  price: number;\n  description: string;\n}\n//step2: 导出\nexport const products = [\n  {\n    id: 1,\n    name: 'Phone XL',\n    price: 799,\n    description: 'A large phone with one of the best screens'\n  }\n];\n// 其他文件中 引用\nimport { products } from '../products';",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-16T09:20:01.454Z",
+        "name": "typejs basic 模块的使用",
+        "tags": [
+            "typejs"
+        ],
+        "content": "\nnamespace SomeNameSpaceName { \n    export interface ISomeInterfaceName {      }  \n    export class SomeClassName {      }  \n }\n// export 和 import \n// TypeScript 模块的设计理念是可以更换的组织代码, 没有 expoert 外部不能访问\nexport interface SomeInterface { \n    // 代码部分\n }\nimport someInterfaceRef = require(\"./SomeInterface\");\n\n\n// 模块声明文件\nhttps://www.runoob.com/typescript/ts-ambient.html\n想引入库，可以 写一个 a.ts 文件， 声明 \ndeclare module Runoob { \n    export class Calc { \n       doSum(limit:number) : number; \n    }\n }",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-16T09:31:53.911Z",
+        "name": "angular: 组件 新建",
+        "tags": [
+            "angular"
+        ],
+        "content": "step1: 生成一个组件 ng generate component product-alerts\nstep2: 会在app.modules 自动 生成 \ndeclarations: [\n    AppComponent\n}\nstep3: 在html 中 使用 组件标签\n// 组件 a.ts\nimport { Component } from '@angular/core';\n  // 所有组件的生命周期： https://angular.cn/guide/lifecycle-hooks\n@Component({\n  selector: 'hello-world', // 选择器，选择标签\n  template: ` // html 模板\n    <h2>Hello World</h2>\n    <p>This is my first component!</p>\n    <p>{{ message }}</p> // 双向绑定语法\n  `\n})\nexport class HelloWorldComponent {\n\n  // The code in this class drives the component's behavior.\n  message = 'Hello, World!';  // 双向绑定赋值\n}\n// 模板\n<hello-world></hello-world>\n\n// 生成的 dom 如下\n<hello-world>\n    <h2>Hello World</h2>\n    <p>This is my first component!</p>\n    <p>Hello, World!</p>\n</hello-world>",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-16T09:36:08.692Z",
+        "name": "angular: 属性和函数的绑定。",
+        "tags": [
+            "angular"
+        ],
+        "content": "https://angular.cn/guide/what-is-angular#dependency-injection\n// 组件 a.ts\nimport { Component } from '@angular/core';\n\n@Component ({\n  selector: 'hello-world-bindings',\n  templateUrl: './hello-world-bindings.component.html'\n})\nexport class HelloWorldBindingsComponent {\n  fontColor = 'blue';\n  sayHelloId = 1;\n  canClick = false;\n  message = 'Hello, World';\n\n  sayMessage() {\n    alert(this.message);\n  }\n}\n// 模板 html \n<button\n  type=\"button\"\n  [disabled]=\"canClick\" //属性绑定\n  (click)=\"sayMessage()\"> //事件绑定\n  Trigger alert message\n</button>\n // 属性绑定\n<p\n  [id]=\"sayHelloId\"\n  [style.color]=\"fontColor\">\n  You can set my color in the component!\n</p>\n \n<p>My color is {{ fontColor }}</p>",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-16T09:42:30.038Z",
+        "name": "agular: basic  ngif 指令的使用",
+        "tags": [
+            "angular"
+        ],
+        "content": "https://angular.cn/guide/what-is-angular#dependency-injection\n// 组件 a.ts\nimport { Component } from '@angular/core';\n \n@Component({\n  selector: 'hello-world-ngif',\n  templateUrl: './hello-world-ngif.component.html'\n})\nexport class HelloWorldNgIfComponent {\n  message = \"I'm read only!\";\n  canEdit = false;\n \n  onEditClick() {\n    this.canEdit = !this.canEdit;\n    if (this.canEdit) {\n      this.message = 'You can edit me!';\n    } else {\n      this.message = \"I'm read only!\";\n    }\n  }\n}\n// 模板 html \n<h2>Hello World: ngIf!</h2>\n \n<button type=\"button\" (click)=\"onEditClick()\">Make text editable!</button> // 绑定 click 事件\n \n<div *ngIf=\"canEdit; else noEdit\"> // 匹配 hello-world-ngif  selector\n    <p>You can edit the following paragraph.</p>\n</div>\n \n<ng-template #noEdit>\n    <p>The following paragraph is read only. Try clicking the button!</p>\n</ng-template>\n \n<p [contentEditable]=\"canEdit\">{{ message }}</p>",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-16T12:05:23.010Z",
+        "name": "angular: 特性 依赖注入",
+        "tags": [
+            "angular"
+        ],
+        "content": "https://angular.cn/guide/what-is-angular#dependency-injection\n//step1: 定义一个 Logger ，平台实现实例化\nimport { Injectable } from '@angular/core';\n\n@Injectable({providedIn: 'root'})\nexport class Logger {\n  writeCount(count: number) {\n    console.warn(count);\n  }\n}\n// 模板 html \nimport { Component } from '@angular/core';\nimport { Logger } from '../logger.service';\n\n@Component({\n  selector: 'hello-world-di',\n  templateUrl: './hello-world-di.component.html'\n})\nexport class HelloWorldDependencyInjectionComponent  {\n  count = 0;\n  // step2: 构造器 如下写， 可以实现注入\n  constructor(private logger: Logger) { }\n\n  onLogMe() {\n    this.logger.writeCount(this.count);\n    this.count++;\n  }\n}",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-16T12:12:04.469Z",
+        "name": "angular 依赖库",
+        "tags": [
+            "angular"
+        ],
+        "content": "\nangular 组件库 https://angular.cn/guide/schematics\nAngular 路由器 // http server\nAngular 表单  //统一的表单填报与验证体系。\nAngular HttpClient\t//健壮的 HTTP 客户端库，它可以支持更高级的客户端-服务器通讯。\nAngular 动画 //富的动画体系，用于驱动基于应用状态的动画。\nAngular PWA\t//一些用于构建渐进式 Web 应用（PWA）的工具，包括 Service Worker 和 Web 应用清单（Manifest）。\nAngular 原理图 //一些搭建脚手架、重构和升级的自动化工具。用于简化大规模应用的开发。 末班项目",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-20T07:34:42.392Z",
+        "name": "typejs: 操作符",
+        "tags": [
+            "typejs"
+        ],
+        "content": "https://segmentfault.com/a/1190000023943952\n?  可选元素访问 为 null 或者 undefined 立即停止表达式， 比如  obj?.prop\n\n?? 空值合并运算符  : 当左侧操作数为 null 或 undefined 时，其返回右侧的操作数，否则返回左侧的操作数\n\n?: 可选属性 : 接口的属性，子类实例化时， 可以不用实现、赋值。\n\nPartial<T> :  快速把某个接口类型中定义的属性变成可选的 type PullDownRefreshOptions = Partial<PullDownRefreshConfig>\n\nRequired<T> : 快速地把某个接口中定义的属性全部声明为可选\n\n& 运算符 :交叉类型是将多个类型合并为一个类型:\ntype PartialPointX = { x: number; };\ntype Point = PartialPointX & { y: number; };\n\n!: 显式赋值断言： 和 ? 相反，表示一定有值，忽略 null undefined 错误\nhttps://www.jianshu.com/p/e604bb77fa88\n\n\ninterface Person {\n  name: string;\n  age?: number;\n}",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-20T07:41:18.272Z",
+        "name": "angular: 组件 父 传递 子数据",
+        "tags": [
+            "angular"
+        ],
+        "content": "step1: 创建组件  ng generate component product-alerts\nstep2: 子组件，标记为接受组件。子组件中引入\n// a.ts\nimport { Component, Input } from '@angular/core';\nimport { Product } from '../products';\n\nexport class ProductAlertsComponent {\n\n  @Input() product!: Product;\n\n}\nstep3: 在html 中，将 子元素的标签，加入到父组件的 html 中， 并绑定属性\n<button type=\"button\" (click)=\"share()\">\n  Share\n</button>\n\n<app-product-alerts\n  [product]=\"product\">\n</app-product-alerts>",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-20T10:19:16.900Z",
+        "name": "angular: 组件 子 传递给 父数据 event",
+        "tags": [
+            "angular"
+        ],
+        "content": "使用事件机制 发送到到上层，\nstep1: 子组件 ts 文件 引入 Output 、eventEmiter 发送。新建一个属性\nexport class ProductAlertsComponent {\n  @Input() product: Product | undefined;\n  @Output() notify = new EventEmitter();\n}\nstep2: 子组件 html 文件，绑定发送函数\n<p *ngIf=\"product && product.price > 700 \">\n  <button type=\"button\" (click)=\"notify.emit()\">Notify Me</button>\n</p>\nstep3: 父组件 ts 文件，定义 响应函数\nonNotify() {\n  window.alert('You will be notified when the product goes on sale');\n}\nstep4: 父html 中 , 进项函数绑定\n<app-product-alerts [product]=\"product\" (notify)=\"onNotify()\">\n\n</app-product-alerts>",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-20T11:49:42.494Z",
+        "name": "angular :  路由 将组件注册为路由",
+        "tags": [
+            "angular"
+        ],
+        "content": "将子组件注册成路由\n子组件在ts 里解析 路由参数\n父组件 调用 Url 找到组件\nstep0: AppComponent.html 中 增加路由组件\n<div class=\"container\">\n  <router-outlet></router-outlet>\n</div>\n\nstep1: app.module.ts 增加路由， 将 path 指向新增组件，比如 ProductDetailsComponent\n@NgModule({\n  imports: [\n    // 必要的路由组建：products/1\n    ReactiveFormsModule,\n    RouterModule.forRoot([\n      { path: 'products/:productId', component: ProductDetailsComponent },\n    ]),\n)\nstep2: 父组件 html, routeLink 生成一个 链接\n<a\n[title]=\"product.name + ' details'\"\n[routerLink]=\"['/products', product.id]\">\n{{ product.name }}\n</a>\nstep3: 子组件ts 注册自己的路由（根据传入的对象）\nimport { Component, OnInit } from '@angular/core';\nimport { ActivatedRoute } from '@angular/router';\n\nexport class ProductDetailsComponent implements OnInit {\n\n  product: Product | undefined;\n  // 依赖注入： 每个组件都有自己专属的 ActivatedRoute。其包含路径和参数信息\n  constructor(private route: ActivatedRoute) { }\n\n  ngOnInit() {\n    // 首先获取路径参数.\n    const routeParams = this.route.snapshot.paramMap;\n    const productIdFromRoute = Number(routeParams.get('productId'));\n\n    // 根据参数id 找到对应的 product 对象\n    this.product = products.find(product => product.id === productIdFromRoute);\n  }\n}\n\nstep4: 子组件html 使用 数据： product 不为空时，展示信息\n\n<h2>Product Details</h2>\n\n<div *ngIf=\"product\">\n  <h3>{{ product.name }}</h3>\n  <h4>{{ product.price | currency }}</h4>\n  <p>{{ product.description }}</p>\n</div>",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-21T07:14:11.735Z",
+        "name": "typejs: 循环控制",
+        "tags": [
+            "typejs"
+        ],
+        "content": "// 控制语句\nif switch 同 js\n// 循环  TypeScript 还支持 for…of 、forEach、every 和 some 循环\nfor(i = num;i>=1;i--) {\n    factorial *= i;\n }\n// forin \nfor (var val in list) { \n    //语句 \n}\n// for of 循环\nlet someArray = [1, \"string\", false];\nfor (let entry of someArray) {\n    console.log(entry); // 1, \"string\", false\n}\nlist.forEach((val, idx, array) => {\n    // val: 当前值\n    // idx：当前index\n    // array: Array\n});\nlist.every((val, idx, array) => {\n    return true; // Continues\n    // Return false will quit the iteration\n});\n{\n    this.items = [];\n    return this.items;\n  }\n}",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-21T08:16:35.878Z",
+        "name": "angular: 使用 httpclient",
+        "tags": [
+            "angular",
+            "httpclient"
+        ],
+        "content": "// http client 使用  https://angular.cn/api/common/http/HttpClient\n// step1: app module 导入\nimport { HttpClientModule } from '@angular/common/http';\n@NgModule({\n  imports: [\n    HttpClientModule,\n  ],})\n// step2: 注入依赖，并使用 get\n  export class CartService {\n    constructor(\n      private http: HttpClient\n    ) {}\n    getShippingPrices() {\n      return this.http.get<{type: string, price: number}[]>('/assets/shipping.json');\n    }\n  }",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-21T08:45:38.046Z",
+        "name": "typejs: rxjs 库：观察者对象",
+        "tags": [
+            "typejs",
+            "rxjs"
+        ],
+        "content": "  https://juejin.cn/post/7067851052841697310 介绍\n  import { Observable } from 'rxjs';\n  // step1: 注册一个 发布源： 有值就发布\n  const emitter : Observable<string> = of(\"Sam\", \"Ray\", \"Thomas\");\n  // step2: Observable 对象，subscribe 接受一个函数作为参数\n  emitter.subscribe((value: string) => {\n    console.log(`Name: ${value}`)\n  }) \n  // 源源不断的产生字符串\n  Name: Sam\n  Name: Ray\n  Name: Thomas",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-02-21T12:07:25.541Z",
+        "name": "html 元素表单",
+        "tags": [
+            "html"
+        ],
+        "content": "表单 https://www.runoob.com/html/html-forms.html\nHTML 表单用于收集用户的输入信息。\nHTML 表单表示文档中的一个区域，此区域包含交互控件，将用户收集到的信息发送到 Web 服务器。\n\n<form action=\"\" action=\"html_form_action.php\" method=\"get\">\n  Username: <input type=\"text\" name=\"user\"><br>\n  Password: <input type=\"password\" name=\"password\">\n  <input type=\"radio\" name=\"sex\" value=\"female\">女\n  <input type=\"checkbox\" name=\"vehicle\" value=\"Car\">复选框\n  <input type=\"submit\" value=\"Submit\"> 提交按钮\n  <!-- \n    type 类型\n    + text 文本\n    + radio 单选按钮\n    + checkbox 复选框\n    method 代表方法： 默认以 get 方法提交 action 中的url, 参数以 ？name=x;方式拼接\n   -->\n  </form>",
+        "contentType": "html"
+    },
+    {
+        "created": "2023-02-21T12:22:50.772Z",
+        "name": "angular :表单组件 ",
+        "tags": [
+            "angular"
+        ],
+        "content": "表单：提交用户信息\n\nstep1: 组件 ts 引入组件\nimport { FormBuilder } from '@angular/forms';\n\nexport class CartComponent {\n  constructor(\n    private formBuilder: FormBuilder, // 注入\n  ) { }\n  // 创建 表单 组件： checkoutForm 是包含 name 和 address 的表单模型\n  checkoutForm = this.formBuilder.group({\n    name: '',\n    address: ''\n  });\n\n  // 定义 submit 函数， 后面 给 html 元素使用\n  onSubmit(): void {\n    // Process checkout data here\n  }\n\n  step2: html 绑定表单\n    // ngSubmit  事件绑定来侦听表单提交\n    // formGroup 属性，绑定 checkoutForm 属性\n    <form [formGroup] = \"checkoutForm\"(ngSubmit) = \"onSubmit()\" >\n      <div>\n      <label for = \"address\" >Address< /label>\n      // formControlName 用来绑定 属性\n      < input id = \"address\" type = \"text\" formControlName = \"address\" >\n      </div>\n\n          < button class = \"button\" type = \"submit\" > Purchase < /button>\n\n    < /form>",
+        "contentType": "typescript"
+    },
+    {
+        "created": "2023-03-09T02:58:34.429Z",
+        "name": "typejs promise 异步处理框架",
+        "tags": [
+            "异步"
+        ],
+        "content": "\n\n Promise 基于回调的异步处理框架\n promise 对象 代表一个`未来的结果` ,状态有: pending 等待中 、fulfilled 已完成 和rejected 已拒绝\n > resolve 函数 :将 pending 改为 fulfilled\n > reject 函数 : 将 pending 改成 rejected\n\n \n 使用1：\nsetp1:创建一个 promise 对象\nnew Promise((resolve,reject)=>{\n    //异步操作逻辑\n    操作成功后，调用 resolve, 走到then\n    resolve(result);\n    操作成功后，调用 reject, 走到catch\n})\nsetp2: then 处理 成功结果\npromise.then((result) => {\n    // 处理成功结果\n})\nsetp3: catch 处理 失败结果\npromise.catch((error) => {\n    // 处理失败结果\n})\n\n\n\n使用2：Promise.resolve() 获取一个解析后的 Promise 对象\n> 1. 如果参数是一个 将持续 pending 状态的 promise，那么直接返回该promise进行等待。\n> 2. 如果参数是一个 值(value)，那么返回一个 以该值(value)做为结果 的 promise。\n\n>> myPromise.then((value) => {\n    console.log(`The resolved value is: ${value}`);\n  });\n> 3. 如果参数是 thenable（即带有定义了then方法的对象），那么返回一个新的Promise 对象，该对象以 thenable 作为参数调用其 then 方法，然后返回所获得的值。如果这个值本身是一个 Promise ,它会被无偏差地转发，原封不动的样子穿过去。\n> 4. 如果调用Promise.resolve()时没有参数，默认返回一个新的 resolved (resolved常常翻译成解决)状态的Promise对象。\n\n\n# 其他\nPromise.all 等待所有结果完成 Promise.race 等待第一个\nconst promise1 = Promise.resolve(1);\nconst promise2 = Promise.resolve(2);\n\nPromise.all([promise1, promise2]).then((results) => {\n  console.log(results); // [1, 2]\n});\n\nconst promise1 = new Promise((resolve) => setTimeout(resolve, 1000));\nconst promise2 = new Promise((resolve) => setTimeout(resolve, 2000));\nPromise.race([promise1, promise2]).then(() => {\n    console.log('At least one Promise is fulfilled!');\n  });",
+        "contentType": "typescript"
+    }
+]
